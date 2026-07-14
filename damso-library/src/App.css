@@ -1,0 +1,256 @@
+:root {
+  --damso-theme-color: #ece8e1;
+  --damso-theme-color-rgb: 236, 232, 225;
+}
+
+.room-viewer {
+  position: relative;
+  width: 100vw;
+  height: 100svh;
+  min-height: 100svh;
+  overflow: hidden;
+  color: #f7efe4;
+  background: #353238;
+  user-select: none;
+  touch-action: none;
+}
+
+.room-viewer.is-night {
+  background: #191921;
+}
+
+.room-viewer::before,
+.room-viewer::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  content: '';
+}
+
+.room-viewer::before {
+  background:
+    radial-gradient(circle at 64% 34%, rgba(255, 248, 236, 0.045), transparent 30%),
+    linear-gradient(115deg, rgba(216, 216, 228, 0.08), transparent 48%),
+    rgba(78, 72, 82, 0.055);
+  mix-blend-mode: soft-light;
+}
+
+.room-viewer::after {
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.035), transparent 34%),
+    radial-gradient(circle at 74% 68%, rgba(42, 36, 38, 0.035), transparent 42%),
+    radial-gradient(circle at center, transparent 54%, rgba(31, 27, 31, 0.08) 80%, rgba(17, 15, 18, 0.22) 100%);
+  mix-blend-mode: soft-light;
+  opacity: 0.58;
+}
+
+.room-viewer.is-night::before {
+  background:
+    radial-gradient(circle at 58% 54%, rgba(255, 196, 118, 0.11), transparent 26%),
+    radial-gradient(circle at 72% 58%, rgba(255, 171, 96, 0.095), transparent 24%),
+    linear-gradient(140deg, rgba(82, 74, 82, 0.1), transparent 58%),
+    rgba(38, 28, 24, 0.035);
+  opacity: 0.62;
+}
+
+.room-viewer.is-night::after {
+  background:
+    radial-gradient(circle at 52% 44%, transparent 28%, rgba(22, 18, 24, 0.055) 62%),
+    radial-gradient(circle at center, transparent 54%, rgba(13, 12, 18, 0.16) 100%);
+  opacity: 0.7;
+}
+
+.room-viewer__canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.room-viewer__glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 58% 31%, rgba(255, 246, 226, 0.2), rgba(255, 239, 214, 0.08) 18%, transparent 36%),
+    radial-gradient(ellipse at 49% 67%, rgba(255, 235, 217, 0.11), transparent 42%),
+    linear-gradient(112deg, transparent 34%, rgba(255, 245, 224, 0.08) 45%, rgba(255, 255, 246, 0.15) 52%, rgba(255, 232, 205, 0.06) 61%, transparent 70%);
+  mix-blend-mode: screen;
+  opacity: 0.54;
+  filter: blur(12px) saturate(1.04);
+}
+
+.room-viewer.is-night .room-viewer__glare {
+  background:
+    radial-gradient(ellipse at 45% 50%, rgba(255, 205, 133, 0.16), transparent 28%),
+    radial-gradient(ellipse at 72% 58%, rgba(255, 177, 94, 0.14), transparent 32%),
+    radial-gradient(ellipse at 62% 30%, rgba(155, 166, 223, 0.07), transparent 34%);
+  opacity: 0.22;
+  filter: blur(22px) saturate(1.04);
+}
+
+.app-intro {
+  --intro-video-bg: #e9e5dd;
+
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  pointer-events: auto;
+  background: var(--intro-video-bg);
+  opacity: 1;
+  transition: opacity 1000ms ease;
+  will-change: opacity;
+}
+
+.app-intro.is-revealing {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.app-intro__video {
+  width: min(106vw, 820px);
+  max-width: none;
+  height: auto;
+  max-height: 100svh;
+  object-fit: contain;
+  object-position: center center;
+  background: var(--intro-video-bg);
+  backface-visibility: hidden;
+  opacity: 0;
+  transform: translate3d(-1.4%, 0, 0);
+  transition: opacity 180ms ease;
+  will-change: opacity;
+}
+
+.app-intro__video.is-visible {
+  opacity: 1;
+}
+
+.time-toggle {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 4;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(255, 240, 220, 0.2);
+  border-radius: 999px;
+  place-items: center;
+  background: rgba(38, 31, 31, 0.48);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.time-toggle:active {
+  transform: scale(0.96);
+}
+
+.time-toggle__icon {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #f1d096;
+  box-shadow:
+    0 0 16px rgba(245, 210, 151, 0.52),
+    0 0 0 5px rgba(245, 210, 151, 0.12);
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.time-toggle__icon::before,
+.time-toggle__icon::after {
+  position: absolute;
+  border-radius: 999px;
+  content: '';
+}
+
+.time-toggle__icon::before {
+  inset: -6px;
+  border: 1px solid rgba(241, 208, 150, 0.36);
+}
+
+.time-toggle__icon::after {
+  inset: 4px 3px auto auto;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 248, 224, 0.84);
+}
+
+.time-toggle.is-night {
+  border-color: rgba(191, 198, 239, 0.22);
+  background: rgba(22, 22, 34, 0.62);
+}
+
+.time-toggle.is-night .time-toggle__icon {
+  background: #d9ddff;
+  box-shadow:
+    inset -6px -1px 0 #777d9e,
+    0 0 16px rgba(191, 198, 239, 0.4),
+    0 0 0 5px rgba(191, 198, 239, 0.1);
+}
+
+.time-toggle.is-night .time-toggle__icon::before {
+  border-color: rgba(191, 198, 239, 0.28);
+}
+
+.time-toggle.is-night .time-toggle__icon::after {
+  display: none;
+}
+
+.book-close-button {
+  position: absolute;
+  top: calc(max(12px, env(safe-area-inset-top)) + 54px);
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 4;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(255, 240, 220, 0.18);
+  border-radius: 999px;
+  place-items: center;
+  color: rgba(255, 245, 230, 0.86);
+  background: rgba(31, 25, 25, 0.54);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1;
+  touch-action: manipulation;
+}
+
+.book-close-button:active {
+  transform: scale(0.96);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-intro {
+    transition-duration: 1ms;
+  }
+}

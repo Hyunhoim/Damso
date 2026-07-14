@@ -1,0 +1,43 @@
+{
+  "name": "damso-memory-library",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "web:dev": "vite --host 0.0.0.0 --port 5174",
+    "build": "tsc -b && vite build . --app",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "cap": "cap",
+    "android:add": "npm run build && cap add android",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android",
+    "android:devices": "set PATH=D:\\src\\platform-tools;%PATH%&& adb devices",
+    "android:run": "npm run android:sync && set ANDROID_HOME=D:\\src&& set ANDROID_SDK_ROOT=D:\\src&& set PATH=D:\\src\\platform-tools;%PATH%&& cap run android",
+    "android:live": "powershell -ExecutionPolicy Bypass -File scripts/android-live.ps1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@tailwindcss/vite": "^4.3.1",
+    "@types/three": "^0.185.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tailwindcss": "^4.3.1",
+    "three": "^0.185.0",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.1",
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "oxlint": "^1.69.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.0"
+  }
+}
