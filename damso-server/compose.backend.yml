@@ -1,0 +1,52 @@
+name: damso-backend
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set backend/.env.local first}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - damso-db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: ./backend
+    env_file: ./backend/.env.local
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Set backend/.env.local first}@db:5432/app
+    command: ["bash", "scripts/prestart.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env.local
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Set backend/.env.local first}@db:5432/app
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - damso-audio-data:/app/backend/data/audio
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  damso-db-data:
+  damso-audio-data:

@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "\ub2f4\uc18c",
+    "slug": "damso-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ece8e1",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "\ub2f4\uc18c \u00b7 \uc6b0\ub9ac \uac00\uc871\uc758 \uc774\uc57c\uae30"
+    },
+    "scheme": "damso",
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ]
+  }
+}

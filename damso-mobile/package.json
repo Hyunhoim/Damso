@@ -1,0 +1,39 @@
+{
+  "name": "damso-mobile",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "dependencies": {
+    "@expo/metro-runtime": "~56.0.21",
+    "expo": "~56.0.23",
+    "expo-constants": "~56.0.27",
+    "expo-font": "~56.0.7",
+    "expo-linking": "~56.0.18",
+    "expo-router": "~56.2.21",
+    "expo-status-bar": "~56.0.4",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-reanimated": "4.3.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2",
+    "react-native-webview": "13.16.1",
+    "react-native-worklets": "0.8.3"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web --port 8081",
+    "typecheck": "tsc --noEmit",
+    "lint": "node ../damso-library/node_modules/oxlint/bin/oxlint src",
+    "test": "node --test tests/*.test.mjs",
+    "export:web": "expo export --platform web"
+  },
+  "private": true
+}

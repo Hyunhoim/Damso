@@ -1,0 +1,13 @@
+__pycache__
+app.egg-info
+*.pyc
+.mypy_cache
+.coverage
+htmlcov
+.cache
+.venv
+.pytest_cache
+.ruff_cache
+app/graphify-out/
+data/
+

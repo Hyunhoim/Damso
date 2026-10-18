@@ -3,6 +3,7 @@ import { useGLTF } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import './App.css'
+import { notifyEmbed } from './EmbedBoundary'
 import {
   LineMaterial,
   LineSegments2,
@@ -10,6 +11,7 @@ import {
 } from 'three-stdlib'
 
 const ROOM_MODEL_URL = '/models/Room.glb'
+const EMBEDDED = new URLSearchParams(window.location.search).get('embedded') === '1'
 const INTRO_VIDEO_URL = '/intro/damso-logo-intro.mp4'
 const CAMERA_START_POSITION: [number, number, number] = [4.3, 1.6, 2.4]
 const CAMERA_START_TARGET: [number, number, number] = [1.6, 1.5, -0.7]
@@ -1210,7 +1212,7 @@ function AppIntroOverlay({
 function App() {
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('day')
   const [viewMode, setViewMode] = useState<ViewMode>('room')
-  const [introPlaybackDone, setIntroPlaybackDone] = useState(false)
+  const [introPlaybackDone, setIntroPlaybackDone] = useState(EMBEDDED)
   const [sceneReady, setSceneReady] = useState(false)
   const isNight = timeOfDay === 'night'
   const isBookOpen = viewMode === 'book'
@@ -1220,6 +1222,7 @@ function App() {
   }, [])
   const handleSceneReady = useCallback(() => {
     setSceneReady(true)
+    if (EMBEDDED) notifyEmbed('damso-room-ready')
   }, [])
   const handleOpenMemoryStory = (story: MemoryPhotoStory) => {
     void story
@@ -1262,7 +1265,7 @@ function App() {
       )}
 
       <div className="room-viewer__glare" aria-hidden="true" />
-      <AppIntroOverlay onPlaybackComplete={handleIntroPlaybackComplete} ready={sceneReady} />
+      {!EMBEDDED && <AppIntroOverlay onPlaybackComplete={handleIntroPlaybackComplete} ready={sceneReady} />}
 
       <button
         className={isNight ? 'time-toggle is-night' : 'time-toggle'}
