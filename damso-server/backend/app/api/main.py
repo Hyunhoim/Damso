@@ -6,6 +6,7 @@ from app.api.routes import (
     families,
     library,
     login,
+    photos,
     profile,
     questions,
     users,
@@ -23,5 +24,6 @@ for domain_router in (
     audio.router,
     library.router,
     profile.router,
+    photos.router,
 ):
     api_router.include_router(domain_router)

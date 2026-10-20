@@ -23,8 +23,9 @@ export function Copy({ style, ...props }: TextProps) {
   const flat = StyleSheet.flatten(style) || {};
   return <Text {...props} style={[styles.copy, style, { fontSize: (flat.fontSize || 18) * textScale, lineHeight: (flat.lineHeight || 29) * textScale }]} />;
 }
-export function Header({ companion }: { companion?: string }) {
-  return <View style={styles.header}><Copy style={styles.brand}>담소</Copy><Copy style={[styles.date, companion && { color: colors.green }]}>{companion ? `${companion}님과 함께` : new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'long' }).format(new Date())}</Copy></View>;
+export function Header({ companion, companionLabel }: { companion?: string; companionLabel?: string }) {
+  const connection = companionLabel ? `${companionLabel}${companionLabel === '부모님' ? '과' : '와'} 함께` : companion ? `${companion}님과 함께` : null;
+  return <View style={styles.header}><Copy style={styles.brand}>담소</Copy><Copy style={[styles.date, connection && { color: colors.green }]}>{connection || new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'long' }).format(new Date())}</Copy></View>;
 }
 export function Button({ label, onPress, secondary = false, disabled = false, style }: { label: string; onPress: () => void; secondary?: boolean; disabled?: boolean; style?: StyleProp<ViewStyle> }) {
   return <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress} style={({ pressed }) => [styles.button, secondary && styles.secondary, disabled && { opacity: 0.45 }, pressed && { opacity: 0.8 }, style]}><Copy style={[styles.buttonText, secondary && { color: colors.green }]}>{label}</Copy></Pressable>;

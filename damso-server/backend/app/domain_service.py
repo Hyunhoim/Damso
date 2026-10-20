@@ -87,6 +87,7 @@ def family_view(session: Session, user: User) -> dict[str, object]:
         "family_id": member.family_id,
         "status": "connected" if len(people) == 2 else "waiting",
         "members": people,
+        "settings": {"parent_label": member.parent_label},
     }
 
 
@@ -170,6 +171,10 @@ def question_for_today(session: Session, user: User, family: Family) -> Question
     ).first()
     if existing:
         return existing
+    from app.question_budget import has_question_capacity
+
+    if not has_question_capacity(session, user.id, today(), for_daily=True):
+        raise HTTPException(409, "Daily question limit reached")
     bank = session.exec(
         select(QuestionBank)
         .where(QuestionBank.role == user.role, col(QuestionBank.enabled).is_(True))
@@ -218,12 +223,27 @@ def owned_answer(session: Session, answer_id: uuid.UUID, user: User) -> Answer:
 def answer_view(session: Session, answer: Answer, user: User) -> dict[str, object]:
     author = session.get(User, answer.author_id)
     question = session.get(Question, answer.question_id)
+    if answer.author_id == user.id:
+        display_name, story_label = "나", "나의 이야기"
+    elif answer.author_role == "parent":
+        member = membership(session, user.id)
+        display_name = (
+            member.parent_label
+            if member and member.family_id == answer.family_id
+            else "부모님"
+        )
+        story_label = f"{display_name}의 이야기"
+    else:
+        display_name = author.full_name if author and author.full_name else "자녀"
+        story_label = f"{display_name}의 이야기"
     data: dict[str, object] = {
         "id": answer.id,
         "question_id": answer.question_id,
         "family_id": answer.family_id,
         "author_id": answer.author_id,
         "author_name": author.full_name if author else None,
+        "author_display_name": display_name,
+        "author_story_label": story_label,
         "author_role": answer.author_role,
         "question": question.text if question else None,
         "status": answer.status,
@@ -243,10 +263,13 @@ def answer_view(session: Session, answer: Answer, user: User) -> dict[str, objec
             transcript=answer.transcript,
             edited_text=answer.edited_text,
             summary_draft=answer.summary_draft,
+            organization_status=answer.organization_status,
+            skipped=answer.skipped,
             follow_up_question=answer.follow_up_question,
             revision=answer.revision,
             audio_id=answer.audio_id,
             share_audio=answer.share_audio,
+            share_original=answer.share_original,
         )
     return data
 

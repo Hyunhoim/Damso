@@ -5,8 +5,9 @@ from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.domain_models import Family, FamilyInvite, FamilyMember
-from app.domain_schemas import InviteCode
+from app.domain_schemas import FamilySettingsUpdate, InviteCode
 from app.domain_service import (
+    active_family,
     create_invite,
     end_family,
     family_view,
@@ -22,6 +23,22 @@ router = APIRouter(prefix="/families", tags=["families"])
 
 @router.get("/me")
 def read_family(session: SessionDep, current_user: CurrentUser) -> Any:
+    return family_view(session, current_user)
+
+
+@router.patch("/me/settings")
+def update_family_settings(
+    body: FamilySettingsUpdate, session: SessionDep, current_user: CurrentUser
+) -> Any:
+    family = active_family(session, current_user.id, lock=True)
+    member = membership(session, current_user.id)
+    if not member or member.family_id != family.id:
+        raise HTTPException(409, "Family connection has ended")
+    if member.role != "child":
+        raise HTTPException(403, "Only the child chooses how to address their parent")
+    member.parent_label = body.parent_label
+    session.add(member)
+    session.commit()
     return family_view(session, current_user)
 
 

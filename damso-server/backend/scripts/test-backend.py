@@ -16,6 +16,11 @@ if parsed.hostname != "127.0.0.1" or parsed.port != 5433:
 test_url = urlunsplit(parsed._replace(path="/damso_test"))
 env = {**os.environ, "DATABASE_URL": test_url, "PYTHONUTF8": "1"}
 env["STORAGE_ROOT"] = str(backend / "data" / "test-audio")
+env["CLOVA_CONFIG_FILE"] = str(backend / "data" / "test-integrations" / "clova.json")
+env["CLOVA_SPEECH_CONFIG_FILE"] = str(
+    backend / "data" / "test-integrations" / "clova-speech.json"
+)
+env["ENABLE_LLM_SETUP_UI"] = "false"
 for args in (
     ["-m", "alembic", "upgrade", "head"],
     [

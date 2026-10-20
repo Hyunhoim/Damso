@@ -8,7 +8,7 @@ from sqlmodel import col, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
-from app.domain_models import Answer, AudioAsset
+from app.domain_models import Answer, AnswerInputRevision, AudioAsset
 from app.domain_service import visible_story
 from app.rate_limit import enforce_limit
 
@@ -146,7 +146,12 @@ def delete_audio(
     item = session.get(AudioAsset, asset_id)
     if not item or item.owner_id != current_user.id:
         raise HTTPException(404, "Audio not found")
-    if session.exec(select(Answer).where(Answer.audio_id == item.id)).first():
+    if (
+        session.exec(select(Answer).where(Answer.audio_id == item.id)).first()
+        or session.exec(
+            select(AnswerInputRevision).where(AnswerInputRevision.audio_id == item.id)
+        ).first()
+    ):
         raise HTTPException(
             409, "Delete the attached answer before removing its recording"
         )

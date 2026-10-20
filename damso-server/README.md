@@ -1,8 +1,10 @@
-# 담소 API 키 등록
+# 담소 서버 · STT·HCX-007 설정
 
-서버 전용 AI 키 보관 파일과 로컬 점검 명령입니다. 별도 패키지 설치 없이 Node.js 24 이상에서 키 입력 상태를 점검할 수 있습니다.
+현재 HCX-007 키 등록은 [로컬 설정 화면](http://127.0.0.1:8000/dev/llm)을 사용합니다. 먼저 [백엔드 실행 안내](backend/RUNBOOK.md)에 따라 `scripts/run-local.py`를 실행하세요. 등록 후 합성 예시 7건을 순서대로 호출하며 실제 API 사용량이 발생합니다. 키는 `backend/data/integrations/clova.json`에 저장되고 Git·모바일 앱·브라우저 저장소에 포함되지 않습니다.
 
-공식 FastAPI 템플릿의 백엔드를 `backend/`에 별도로 가져왔습니다. [백엔드 실행 안내](./backend/README.md)를 참고하세요. 기존 AI 키 파일은 유지했으며, 가족 연결·질문·답변·서재·음성 업로드 API와 PostgreSQL을 구현했습니다. 모바일 화면 연결과 실제 STT·LLM 모델 호출은 아직 하지 않았습니다.
+가족 연결·질문·답변·서재·음성 업로드 API와 PostgreSQL, HCX-007 요약·꼬리질문 호출과 워커를 구현했습니다. CLOVA Speech 장문 인식 어댑터와 STT→LLM 작업 연결을 구현했습니다. 등록한 키로 합성 음성 1건의 실제 Speech→HCX 호출을 확인했습니다. [실제 연결 검증 기록](backend/STT_LLM_CONNECTION_TEST_REPORT.md)을 참고하세요. 모바일은 로그인 후 질문·서재 API와 연결하며 TTS는 준비 중입니다. 최신 원문·원음·사진·질문 한도와 검증 내용은 아래 API 명세와 RUNBOOK을 따릅니다. Speech 키·Invoke URL은 같은 로컬 설정 화면에서 등록합니다. [API 명세](backend/API_CONTRACT.md) · [최근 STT·LLM 검증 기록](backend/STT_LLM_TEST_REPORT.md)
+
+아래 1~3절과 `check:env` 명령은 이전 Whisper·HCX `.env.local` 초기 설정 기록입니다. 현재 HCX 설정 화면과 워커는 이 파일을 읽지 않습니다. 기존 파일과 점검 코드는 유지하며, 현재 CLOVA Speech 방식에는 OpenAI 키가 필요하지 않습니다.
 
 ## 1. 키 발급
 

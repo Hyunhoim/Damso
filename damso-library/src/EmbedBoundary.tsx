@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from 'react';
 
-export function notifyEmbed(type: 'damso-room-ready' | 'damso-room-error') {
+export function notifyEmbed(type: 'damso-room-ready' | 'damso-room-error' | 'damso-open-album' | 'damso-open-library') {
   const message = JSON.stringify({ type });
   const native = (window as Window & { ReactNativeWebView?: { postMessage: (value: string) => void } }).ReactNativeWebView;
   native?.postMessage(message);

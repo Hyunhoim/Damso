@@ -9,6 +9,8 @@ from app.api.deps import CurrentUser, SessionDep
 from app.domain_models import Answer, Question
 from app.domain_schemas import CustomQuestionInput
 from app.domain_service import active_family, notify, partner, question_for_today, today
+from app.follow_ups import follow_ups_for_today
+from app.question_budget import extra_question_ids, has_question_capacity
 from app.rate_limit import enforce_limit
 
 router = APIRouter(prefix="/questions", tags=["questions"])
@@ -24,7 +26,8 @@ def today_questions(session: SessionDep, current_user: CurrentUser) -> Any:
             Question.family_id == family.id,
             Question.target_id == current_user.id,
             Question.source == "custom",
-            Question.available_date <= today(),
+            Question.available_date == today(),
+            col(Question.id).in_(extra_question_ids(session, current_user.id, today())),
             col(Question.canceled).is_(False),
         )
         .order_by(col(Question.created_at))
@@ -36,13 +39,23 @@ def today_questions(session: SessionDep, current_user: CurrentUser) -> Any:
             select(Answer).where(Answer.question_id == item.id)
         ).first()
         result["answer_id"] = answer.id if answer else None
-        result["answer_status"] = answer.status if answer else None
+        result["answer_status"] = (
+            "skipped"
+            if answer and answer.skipped
+            else answer.status
+            if answer
+            else None
+        )
         return result
 
+    follow_ups = follow_ups_for_today(session, current_user, family)
     result = {
         "date": today(),
         "role": current_user.role,
         "daily": view(daily),
+        "follow_up": follow_ups[0] if follow_ups else None,
+        "follow_ups": follow_ups,
+        "daily_limit": 3,
         "custom": [view(item) for item in custom],
     }
     session.commit()
@@ -63,6 +76,8 @@ def custom_question(
     day = body.available_date or today()
     if not today() <= day <= today() + timedelta(days=30):
         raise HTTPException(422, "Choose a date within the next 30 days")
+    if not has_question_capacity(session, child.id, day):
+        raise HTTPException(409, "Daily question limit reached")
     item = Question(
         family_id=family.id,
         target_id=child.id,
