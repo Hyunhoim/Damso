@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "\ub2f4\uc18c",
+    "name": "담소",
     "slug": "damso-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -22,12 +22,27 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
       "output": "single",
-      "name": "\ub2f4\uc18c \u00b7 \uc6b0\ub9ac \uac00\uc871\uc758 \uc774\uc57c\uae30"
+      "name": "담소 · 우리 가족의 이야기"
     },
     "scheme": "damso",
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "이야기를 녹음하려면 마이크 사용을 허용해주세요."
+        }
+      ],
+      "expo-asset",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "이야기에 함께 남길 사진을 선택할 수 있어요.",
+          "cameraPermission": false,
+          "microphonePermission": "이야기를 녹음하려면 마이크 사용을 허용해주세요."
+        }
+      ]
     ]
   }
 }

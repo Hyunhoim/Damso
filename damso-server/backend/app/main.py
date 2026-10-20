@@ -9,6 +9,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
 from app.api.main import api_router
+from app.api.routes.llm_setup import router as llm_setup_router
 from app.core.config import settings
 from app.core.db import engine
 from app.http_limits import RequestSizeLimit
@@ -36,6 +37,7 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(llm_setup_router)
 app.add_middleware(RequestSizeLimit, audio_limit=settings.MAX_AUDIO_BYTES)
 
 

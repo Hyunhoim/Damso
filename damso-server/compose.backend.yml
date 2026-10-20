@@ -38,6 +38,7 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - damso-audio-data:/app/backend/data/audio
+      - damso-integration-data:/app/backend/data/integrations
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"]
       interval: 15s
@@ -47,6 +48,21 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env.local
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Set backend/.env.local first}@db:5432/app
+    command: ["python", "-m", "app.worker"]
+    volumes:
+      - damso-audio-data:/app/backend/data/audio
+      - damso-integration-data:/app/backend/data/integrations
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
 volumes:
   damso-db-data:
   damso-audio-data:
+  damso-integration-data:

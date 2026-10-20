@@ -476,11 +476,14 @@ def test_disabled_providers_and_successful_stt_llm_chain_preserve_source(client)
             return "첫 월급으로 어머니께 내복을 사드렸어요."
 
     class Writer:
-        def organize(self, *, question, original_text):
+        def organize(self, *, question, original_text, author_name, summary_style):
             assert (
                 question and original_text == "첫 월급으로 어머니께 내복을 사드렸어요."
             )
+            assert author_name == "parent"
             return ModelResult(
+                status="ready",
+                title="첫 월급으로 드린 내복",
                 summary="첫 월급으로 어머니께 내복을 선물했습니다.",
                 follow_up_question="어머니께서는 어떤 말씀을 하셨나요?",
             )

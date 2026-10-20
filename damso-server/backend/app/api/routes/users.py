@@ -13,7 +13,7 @@ from app.api.deps import (
 from app.auth_sessions import revoke_all
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
-from app.domain_models import AudioAsset
+from app.domain_models import AudioAsset, StoryPhoto
 from app.domain_service import end_family
 from app.models import (
     Item,
@@ -153,8 +153,13 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
             select(AudioAsset).where(AudioAsset.owner_id == current_user.id)
         ).all()
     ]
+    photos = session.exec(
+        select(StoryPhoto.id).where(StoryPhoto.owner_id == current_user.id)
+    ).all()
     session.delete(current_user)
     session.commit()
+    for photo_id in photos:
+        (settings.STORAGE_ROOT / f"{photo_id}.jpg").unlink(missing_ok=True)
     for asset_id in assets:
         (settings.STORAGE_ROOT / f"{asset_id}.bin").unlink(missing_ok=True)
     return Message(message="User deleted successfully")
@@ -252,8 +257,13 @@ def delete_user(
             select(AudioAsset).where(AudioAsset.owner_id == user.id)
         ).all()
     ]
+    photos = session.exec(
+        select(StoryPhoto.id).where(StoryPhoto.owner_id == user.id)
+    ).all()
     session.delete(user)
     session.commit()
+    for photo_id in photos:
+        (settings.STORAGE_ROOT / f"{photo_id}.jpg").unlink(missing_ok=True)
     for asset_id in assets:
         (settings.STORAGE_ROOT / f"{asset_id}.bin").unlink(missing_ok=True)
     return Message(message="User deleted successfully")

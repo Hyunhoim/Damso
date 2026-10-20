@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="damso-setup" content="__SETUP_TOKEN__">
+  <title>담소 · STT·LLM 연결 설정</title>
+  <link rel="stylesheet" href="/dev/llm/assets/style.css">
+  <script src="/dev/llm/assets/app.js" defer></script>
+</head>
+<body>
+  <aside>
+    <a class="brand" href="#connection">담소<span>개발 설정</span></a>
+    <nav aria-label="설정 목차"><a href="#speech">01 음성 인식 설정</a><a href="#connection">02 LLM 연결 설정</a><a href="#tests">03 입출력 테스트</a><a href="#prompt">04 공통 프롬프트</a></nav>
+    <div class="side-note"><span class="dot"></span> 이 PC에서만 열리는 화면<p>부모·자녀의 앱 설정과 분리된 개발용 도구입니다.</p></div>
+  </aside>
+  <main>
+    <header><p class="eyebrow">DAMSO / INTEGRATIONS</p><h1>STT·LLM 연결 설정</h1><p>목소리를 글로 옮기고, 가족에게 남길 이야기를 정리합니다.</p></header>
+    <section id="speech" aria-labelledby="speech-heading">
+      <div class="section-heading"><h2 id="speech-heading">CLOVA Speech 설정</h2><span id="speech-status" class="status">상태 확인 중</span></div>
+      <p class="help">네이버 클라우드 콘솔 → CLOVA Speech → 장문 인식 도메인 → 빌더 → 설정 → 연동 정보에서 Secret Key와 Invoke URL을 확인해주세요. HCX-007 키와는 별도입니다.</p>
+      <form id="speech-key-form" method="post" action="/dev/llm/speech/key" class="stack-form">
+        <label for="speech-key">CLOVA Speech Secret Key</label><input id="speech-key" name="secret_key" type="password" autocomplete="off" spellcheck="false" minlength="16" maxlength="512" required placeholder="장문 인식 도메인의 Secret Key">
+        <label for="invoke-url">CLOVA Speech Invoke URL</label><input id="invoke-url" name="invoke_url" type="password" autocomplete="off" spellcheck="false" maxlength="512" required placeholder="https://clovaspeech-gw.ncloud.com/external/v1/…">
+        <p class="help">URL 뒤에 /recognizer/upload는 붙이지 않습니다. 두 값 모두 서버의 비공개 설정 파일에만 저장합니다.</p>
+        <button id="save-speech-key" type="submit">STT 설정 저장</button>
+      </form>
+      <p id="speech-message" role="status" aria-live="polite"></p>
+      <details class="custom"><summary>음성 파일로 STT → LLM 테스트</summary>
+        <form id="speech-test-form" method="post" action="/dev/llm/speech/test" enctype="multipart/form-data">
+          <label for="speech-question">답변한 질문</label><input id="speech-question" name="question" maxlength="500" value="오늘 기억에 남는 일이 있었나요?">
+          <label for="speech-summary-style">이야기 요약 문체</label><select id="speech-summary-style" name="summary_style"><option value="auto">내 말투 살리기 · 기본</option><option value="diary">담백한 일기</option></select><label for="speech-audio">테스트할 음성 파일</label><input id="speech-audio" name="file" type="file" accept="audio/*,.m4a,.webm" required>
+          <p class="help">최대 10분·25 MiB. 선택한 음성이 CLOVA Speech로, 전사문이 HCX-007로 전송되며 각각 API 사용량이 발생합니다. 결과는 서재에 저장하지 않습니다. 테스트용 파일을 사용해주세요.</p>
+          <button id="run-speech-test" class="secondary" type="submit" disabled>음성을 전사하고 이야기 정리하기</button>
+        </form><div id="speech-output"></div>
+      </details>
+    </section>
+    <section id="connection" aria-labelledby="connection-heading">
+      <div class="section-heading"><h2 id="connection-heading">API 키 등록</h2><span id="key-status" class="status">상태 확인 중</span></div>
+      <dl class="connection-info"><div><dt>모델</dt><dd>HyperCLOVA X · HCX-007</dd></div><div><dt>음성 처리</dt><dd>CLOVA Speech → HCX-007 · TTS 별도</dd></div></dl>
+      <form id="key-form" method="post" action="/dev/llm/key">
+        <label for="api-key">CLOVA Studio API 키</label>
+        <div class="key-input"><input id="api-key" name="api_key" type="password" autocomplete="off" spellcheck="false" minlength="16" maxlength="512" required placeholder="API 키 값만 붙여넣어주세요" aria-describedby="key-help"><button id="show-key" class="plain" type="button" aria-pressed="false">보기</button></div>
+        <p id="key-help" class="help">키는 서버의 비공개 설정 파일에 저장합니다. 브라우저 저장소나 모바일 앱에는 보관하지 않습니다.</p>
+        <div class="form-action"><button id="save-key" type="submit">등록하고 테스트 시작</button><p>등록 후 예시 7건을 순서대로 호출합니다.<br>네이버 클라우드 API 사용량이 발생합니다.</p></div>
+      </form>
+      <p id="message" role="status" aria-live="polite"></p>
+    </section>
+    <section id="tests" aria-labelledby="tests-heading">
+      <div class="section-heading"><div><p class="eyebrow">INPUT → SUMMARY + QUESTION</p><h2 id="tests-heading">입출력 확인</h2></div><button id="run-all" class="secondary" type="button" disabled>7건 다시 테스트</button></div>
+      <p class="help">원문 → 요약 → 꼬리질문 순서로 확인합니다. 형식 검증과 내용 검토는 구분합니다.</p>
+      <div id="case-list" aria-live="polite"></div>
+      <details class="custom"><summary>직접 입력해서 테스트</summary><form id="custom-form" method="post" action="/dev/llm/test"><label for="author-name">작성자 이름 (본문 머리말에는 넣지 않음)</label><input id="author-name" maxlength="255" value="지영"><label for="question">질문</label><input id="question" maxlength="500" value="오늘 기억에 남는 일이 있었나요?"><label for="summary-style">이야기 요약 문체</label><select id="summary-style"><option value="auto">내 말투 살리기 · 기본</option><option value="diary">담백한 일기 · 했다</option></select><label for="source">음성에서 전사된 텍스트 또는 직접 쓴 답변</label><textarea id="source" rows="4" maxlength="20000" required placeholder="테스트할 답변을 입력해주세요"></textarea><p class="help">이 입력은 HCX-007로 전송됩니다. 테스트 내용은 서재에 저장하지 않습니다.</p><button id="custom-run" class="secondary" disabled>이 답변 테스트</button></form><div id="custom-output"></div></details>
+    </section>
+    <section id="prompt" aria-labelledby="prompt-heading"><div class="section-heading"><h2 id="prompt-heading">공통 프롬프트</h2><span class="tag">__PROMPT_VERSION__</span></div><p>원문 말투를 살리는 1인칭 기록체 · 선택적 고정 문체 · 원문 사실 보존 · 단일 꼬리질문 · 입력 지시문 분리</p><details><summary>프롬프트 원문 보기</summary><pre id="prompt-text">불러오는 중</pre></details></section>
+    <footer>ready 상태의 요약만 작성자가 확인한 뒤 서재에 공개합니다. no_story·declined 안내는 이야기로 저장하지 않습니다. 원문은 별도로 보존합니다.</footer>
+  </main>
+</body>
+</html>

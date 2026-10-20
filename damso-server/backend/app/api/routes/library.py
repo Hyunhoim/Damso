@@ -8,7 +8,14 @@ from sqlmodel import col, select
 from app.api.deps import CurrentUser, SessionDep
 from app.domain_models import Answer, StoryComment, StoryReaction
 from app.domain_schemas import CommentInput
-from app.domain_service import answer_view, library_query, notify, visible_story
+from app.domain_service import (
+    active_family,
+    answer_view,
+    library_query,
+    notify,
+    visible_story,
+)
+from app.follow_ups import request_family_follow_up
 from app.models import User
 from app.rate_limit import enforce_limit
 
@@ -52,6 +59,17 @@ def read_story(
     if answer.status != "submitted":
         raise HTTPException(404, "Shared story not found")
     data = answer_view(session, answer, current_user)
+    own = answer.author_id == current_user.id
+    data["original"] = {
+        "text": (answer.original_text or answer.transcript)
+        if own or answer.share_original
+        else None,
+        "kind": "text" if answer.original_text else "transcript",
+        "audio_url": data.get("audio_url"),
+        "has_audio": answer.audio_id is not None,
+        "share_original": answer.share_original,
+        "share_audio": answer.share_audio,
+    }
     comments = session.exec(
         select(StoryComment)
         .where(StoryComment.answer_id == answer.id)
@@ -151,3 +169,26 @@ def unreact(
         session.delete(item)
         session.commit()
     return {"reacted": False}
+
+
+@router.post("/{answer_id}/follow-up", status_code=201)
+def ask_more(
+    answer_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+) -> Any:
+    enforce_limit(f"ask-more:{current_user.id}", limit=20)
+    family = active_family(session, current_user.id, lock=True)
+    answer = visible_story(session, answer_id, current_user, lock=True)
+    if (
+        answer.family_id != family.id
+        or answer.author_id == current_user.id
+        or answer.status != "submitted"
+    ):
+        raise HTTPException(404, "A shared story by your current family is required")
+    slot = request_family_follow_up(session, answer, current_user)
+    session.commit()
+    return {
+        "scheduled_for": slot.day,
+        "question_id": slot.question_id,
+        "source_answer_id": answer.id,
+        "status": "scheduled",
+    }

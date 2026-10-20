@@ -27,6 +27,16 @@ class Settings(BaseSettings):
     MAX_AUDIO_BYTES: int = 25 * 1024 * 1024
     MAX_AUDIO_SECONDS: int = 600
     INVITE_TTL_MINUTES: int = 30
+    ENABLE_LLM_SETUP_UI: bool = False
+    CLOVA_CONFIG_FILE: Path = (
+        Path(__file__).resolve().parents[2] / "data" / "integrations" / "clova.json"
+    )
+    CLOVA_SPEECH_CONFIG_FILE: Path = (
+        Path(__file__).resolve().parents[2]
+        / "data"
+        / "integrations"
+        / "clova-speech.json"
+    )
     BACKEND_CORS_ORIGINS: list[str] = ["http://127.0.0.1:8081"]
     FRONTEND_HOST: str = "http://localhost:8081"
     FASTAPI_ENV: Literal["development"] | None = None

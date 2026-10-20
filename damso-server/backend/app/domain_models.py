@@ -44,6 +44,10 @@ class FamilyMember(SQLModel, table=True):
     __table_args__ = (
         UniqueConstraint("family_id", "role", name="uq_family_role"),
         CheckConstraint("role IN ('parent', 'child')", name="ck_member_role"),
+        CheckConstraint(
+            "parent_label IN ('부모님', '엄마', '아빠', '어머니', '아버지')",
+            name="ck_member_parent_label",
+        ),
     )
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     family_id: uuid.UUID = Field(
@@ -51,6 +55,7 @@ class FamilyMember(SQLModel, table=True):
     )
     user_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE", unique=True)
     role: str = Field(max_length=16)
+    parent_label: str = Field(default="부모님", max_length=16)
 
 
 class FamilyInvite(SQLModel, table=True):
@@ -79,7 +84,9 @@ class Question(SQLModel, table=True):
         UniqueConstraint(
             "family_id", "target_id", "daily_date", name="uq_daily_question"
         ),
-        CheckConstraint("source IN ('daily', 'custom')", name="ck_question_source"),
+        CheckConstraint(
+            "source IN ('daily', 'custom', 'follow_up')", name="ck_question_source"
+        ),
     )
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     family_id: uuid.UUID = Field(
@@ -109,6 +116,10 @@ class AudioAsset(SQLModel, table=True):
 class Answer(SQLModel, table=True):
     __table_args__ = (
         CheckConstraint("status IN ('draft', 'submitted')", name="ck_answer_status"),
+        CheckConstraint(
+            "organization_status IS NULL OR organization_status IN ('ready','no_story','declined')",
+            name="ck_answer_organization",
+        ),
     )
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     question_id: uuid.UUID = Field(
@@ -126,11 +137,14 @@ class Answer(SQLModel, table=True):
     transcript: str | None = Field(default=None, sa_column=Column(Text))
     edited_text: str | None = Field(default=None, sa_column=Column(Text))
     summary_draft: str | None = Field(default=None, sa_column=Column(Text))
+    organization_status: str | None = Field(default=None, max_length=16)
+    skipped: bool = False
     follow_up_question: str | None = Field(default=None, max_length=500)
     published_text: str | None = Field(default=None, sa_column=Column(Text))
     title: str | None = Field(default=None, max_length=100)
     status: str = Field(default="draft", max_length=16)
     share_audio: bool = False
+    share_original: bool = False
     revision: int = 1
     story_date: date | None = Field(default=None, index=True)
     created_at: datetime = timestamp()
@@ -197,3 +211,52 @@ class RateBucket(SQLModel, table=True):
     expires_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), nullable=False)
     )
+
+
+class AnswerInputRevision(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    answer_id: uuid.UUID = Field(
+        foreign_key="answer.id", ondelete="CASCADE", index=True
+    )
+    revision: int
+    audio_id: uuid.UUID | None = Field(
+        default=None, foreign_key="audioasset.id", ondelete="SET NULL"
+    )
+    original_text: str | None = Field(default=None, sa_column=Column(Text))
+    transcript: str | None = Field(default=None, sa_column=Column(Text))
+    edited_text: str | None = Field(default=None, sa_column=Column(Text))
+    created_at: datetime = timestamp()
+
+
+class DailyFollowUp(SQLModel, table=True):
+    __table_args__ = (
+        UniqueConstraint("user_id", "day", "kind", name="uq_follow_up_user_day_kind"),
+        CheckConstraint("kind IN ('ai','family')", name="ck_follow_up_kind"),
+    )
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE", index=True)
+    family_id: uuid.UUID = Field(foreign_key="family.id", ondelete="CASCADE")
+    day: date
+    kind: str = Field(max_length=16)
+    source_answer_id: uuid.UUID | None = Field(
+        default=None, foreign_key="answer.id", ondelete="SET NULL"
+    )
+    question_id: uuid.UUID | None = Field(
+        default=None, foreign_key="question.id", ondelete="SET NULL"
+    )
+    created_by: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", ondelete="SET NULL"
+    )
+    created_at: datetime = timestamp()
+
+
+class StoryPhoto(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    answer_id: uuid.UUID = Field(
+        foreign_key="answer.id", ondelete="CASCADE", index=True
+    )
+    owner_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE", index=True)
+    width: int
+    height: int
+    byte_size: int
+    created_at: datetime = timestamp()

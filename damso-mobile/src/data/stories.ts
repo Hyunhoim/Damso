@@ -17,12 +17,14 @@ export function makeStory(answer: string, author: Role, now = new Date()): Story
   const date = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(now);
   return { id: `story-${now.getTime()}`, author, date, title: text.split(/[\n.!?]/)[0].slice(0, 32), question: questions[author].replace(/\n/g, ' '), text, sample: false };
 }
-export function parseRoomMessage(data: unknown): 'ready' | 'error' | null {
+export function parseRoomMessage(data: unknown): 'ready' | 'error' | 'album' | 'library' | null {
   try {
     const value = typeof data === 'string' ? JSON.parse(data) : data;
     if (!value || typeof value !== 'object' || !('type' in value)) return null;
     if (value?.type === 'damso-room-ready') return 'ready';
     if (value?.type === 'damso-room-error') return 'error';
+    if (value?.type === 'damso-open-album') return 'album';
+    if (value?.type === 'damso-open-library') return 'library';
   } catch { /* Unrelated messages are ignored. */ }
   return null;
 }

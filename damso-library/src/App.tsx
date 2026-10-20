@@ -1210,6 +1210,7 @@ function AppIntroOverlay({
 }
 
 function App() {
+  const [albumOpen, setAlbumOpen] = useState(false)
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('day')
   const [viewMode, setViewMode] = useState<ViewMode>('room')
   const [introPlaybackDone, setIntroPlaybackDone] = useState(EMBEDDED)
@@ -1226,6 +1227,8 @@ function App() {
   }, [])
   const handleOpenMemoryStory = (story: MemoryPhotoStory) => {
     void story
+    if (EMBEDDED) notifyEmbed('damso-open-album')
+    else setAlbumOpen(true)
   }
 
   return (
@@ -1255,7 +1258,8 @@ function App() {
             <MemoryPhotoFrames onOpenStory={handleOpenMemoryStory} />
             <MemoryBookInteraction
               onOpen={() => {
-                setViewMode('book')
+                if (EMBEDDED) notifyEmbed('damso-open-library')
+                else setViewMode('book')
               }}
             />
           </Suspense>
@@ -1264,6 +1268,7 @@ function App() {
         </Canvas>
       )}
 
+      {albumOpen && <div role="dialog" aria-modal="true" aria-label="가족 앨범" style={{ position: 'absolute', inset: '10%', zIndex: 50, background: '#faf8f3', color: '#353238', padding: 28, borderRadius: 16 }}><h2>가족 앨범</h2><p>담소 앱의 서재에서 이야기에 사진을 등록하면 이 공간에서 같은 가족 앨범을 열 수 있어요.</p><button onClick={() => setAlbumOpen(false)}>닫기</button></div>}
       <div className="room-viewer__glare" aria-hidden="true" />
       {!EMBEDDED && <AppIntroOverlay onPlaybackComplete={handleIntroPlaybackComplete} ready={sceneReady} />}
 

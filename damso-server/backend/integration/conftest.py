@@ -23,6 +23,25 @@ def clean_test_database():
     if root != (Path(__file__).resolve().parents[1] / "data/test-audio").resolve():
         pytest.fail("Unexpected test audio directory")
     root.mkdir(parents=True, exist_ok=True)
+    key_file = settings.CLOVA_CONFIG_FILE.resolve()
+    if (
+        key_file
+        != (
+            Path(__file__).resolve().parents[1] / "data/test-integrations/clova.json"
+        ).resolve()
+    ):
+        pytest.fail("Unexpected test key file")
+    key_file.unlink(missing_ok=True)
+    speech_file = settings.CLOVA_SPEECH_CONFIG_FILE.resolve()
+    if (
+        speech_file
+        != (
+            Path(__file__).resolve().parents[1]
+            / "data/test-integrations/clova-speech.json"
+        ).resolve()
+    ):
+        pytest.fail("Unexpected test Speech key file")
+    speech_file.unlink(missing_ok=True)
     for path in root.glob("*"):
         if path.is_file():
             path.unlink()

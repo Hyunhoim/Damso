@@ -6,6 +6,8 @@ from pydantic import EmailStr
 from sqlalchemy import CheckConstraint, String
 from sqlmodel import Field, Relationship, SQLModel
 
+from app.summary_styles import SummaryStyle
+
 
 def get_datetime_utc() -> datetime:
     return datetime.now(UTC)
@@ -21,6 +23,7 @@ class UserBase(SQLModel):
     text_scale: float = Field(default=1.0, ge=1.0, le=1.5)
     reminder_time: time = Field(default=time(19, 0))
     notifications_enabled: bool = True
+    summary_style: SummaryStyle = Field(default="auto", sa_type=String(24))
 
 
 # Properties to receive via API on creation
@@ -58,6 +61,10 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     __table_args__ = (
         CheckConstraint("role IN ('parent', 'child')", name="ck_user_role"),
+        CheckConstraint(
+            "summary_style IN ('auto', 'diary')",
+            name="ck_user_summary_style",
+        ),
     )
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str

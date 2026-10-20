@@ -15,6 +15,9 @@ class RequestSizeLimit:
         limit = (
             self.audio_limit + 1024 * 1024
             if scope.get("path", "").rstrip("/").endswith("/audio")
+            or scope.get("path", "").rstrip("/") == "/dev/llm/speech/test"
+            else 11 * 1024 * 1024
+            if scope.get("path", "").rstrip("/").endswith("/photos")
             else 1024 * 1024
         )
         headers = dict(scope.get("headers", []))
