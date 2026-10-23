@@ -1,5 +1,5 @@
 export type Role = 'parent' | 'child';
-export type Story = { id: string; author: Role; date: string; title: string; question: string; text: string; sample: boolean };
+export type Story = { id: string; author: Role; authorId?: string; heading?: string; date: string; title: string; question: string; text: string; sample: boolean };
 export const questions: Record<Role, string> = {
   parent: '어릴 때 가장\n좋아했던 집밥은\n무엇이었나요?',
   child: '오늘 먹은 음식 중\n기억에 남는 건\n무엇인가요?',

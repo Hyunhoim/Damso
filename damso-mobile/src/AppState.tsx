@@ -4,7 +4,8 @@ import { makeStory, sampleStories, type Role, type Story } from './data/stories'
 import { isParentLabel, parentLabelStorageKey, type ParentLabel } from './data/family';
 import { migratePreferences, preferencesStorageKey, legacyPreferencesStorageKey, isSummaryStyle, type Preferences, type SummaryStyle } from './data/preferences';
 
-type AppState = { summaryStyle: SummaryStyle; onboardingComplete: boolean; preferencesReady: boolean; preferencesError: string; preferencesSaving: boolean; savePreferences: (value: Preferences) => Promise<boolean>; role: Role; setRole: (role: Role) => void; textScale: number; setTextScale: (scale: number) => void; stories: Story[]; addStory: (answer: string) => void; parentLabel: ParentLabel; setParentLabel: (label: ParentLabel) => Promise<void>; familySettingsReady: boolean; familySettingsSaving: boolean; familySettingsError: string; familySettingsSaved: boolean };
+type ServerPreferences = { role: Role; textScale: number; summaryStyle: SummaryStyle; parentLabel: ParentLabel };
+type AppState = { applyServerPreferences: (value: ServerPreferences) => void; summaryStyle: SummaryStyle; onboardingComplete: boolean; preferencesReady: boolean; preferencesError: string; preferencesSaving: boolean; savePreferences: (value: Preferences) => Promise<boolean>; role: Role; setRole: (role: Role) => void; textScale: number; setTextScale: (scale: number) => void; stories: Story[]; addStory: (answer: string) => void; parentLabel: ParentLabel; setParentLabel: (label: ParentLabel) => Promise<void>; familySettingsReady: boolean; familySettingsSaving: boolean; familySettingsError: string; familySettingsSaved: boolean };
 const StateContext = createContext<AppState | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [summaryStyle, setSummaryStyle] = useState<SummaryStyle>('auto');
@@ -60,11 +61,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPreferencesError('설정을 저장하지 못했어요. 다시 시도해주세요.'); return false;
     } finally { preferenceSave.current = false; setPreferencesSaving(false); }
   }
+  function applyServerPreferences(value: ServerPreferences) {
+    setRole(value.role); setTextScale(value.textScale); setSummaryStyle(value.summaryStyle); updateParentLabel(value.parentLabel); setOnboardingComplete(true);
+  }
   function addStory(answer: string) {
     const story = makeStory(answer, role);
     setStories(current => [story, ...current]);
   }
-  return <StateContext.Provider value={{ summaryStyle, onboardingComplete, preferencesReady, preferencesError, preferencesSaving, savePreferences, role, setRole, textScale, setTextScale, stories, addStory, parentLabel, setParentLabel, familySettingsReady, familySettingsSaving, familySettingsError, familySettingsSaved }}>{children}</StateContext.Provider>;
+  return <StateContext.Provider value={{ applyServerPreferences, summaryStyle, onboardingComplete, preferencesReady, preferencesError, preferencesSaving, savePreferences, role, setRole, textScale, setTextScale, stories, addStory, parentLabel, setParentLabel, familySettingsReady, familySettingsSaving, familySettingsError, familySettingsSaved }}>{children}</StateContext.Provider>;
 }
 export function useApp() {
   const state = useContext(StateContext);

@@ -24,8 +24,9 @@ export function PhotoViewer({ photo, onClose }: { photo: Photo | null; onClose: 
 export function StoryPhotos({ answerId, canUpload }: { answerId: string; canUpload: boolean }) {
   const backend = useBackend(); const [photos, setPhotos] = useState<Photo[]>([]); const [error, setError] = useState('');
   const [busy, setBusy] = useState(false); const [selected, setSelected] = useState<Photo | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   useEffect(() => {
-    let active = true; setPhotos([]); setError('');
+    let active = true; setPhotos([]); setSelected(null); setDeleteId(null); setError('');
     if (backend.connected) void backend.api<{data: Photo[]}>(`/library/${answerId}/photos`).then(result => { if (active) setPhotos(result.data); }).catch(() => { if (active) setError('사진을 불러오지 못했어요. 다시 열어주세요.'); });
     return () => { active = false; };
   }, [answerId, backend.connected, backend.profile?.id, backend.api]);
@@ -48,7 +49,8 @@ export function StoryPhotos({ answerId, canUpload }: { answerId: string; canUplo
   if (!backend.connected) return null;
   return <View style={styles.section}><Copy accessibilityRole="header">이야기와 함께 남긴 사진</Copy>
     {photos.length === 0 && <Copy style={styles.hint}>이날의 사진을 함께 보관할 수 있어요.</Copy>}
-    <View style={styles.grid}>{photos.map(photo => <Pressable key={photo.id} accessibilityRole="button" accessibilityLabel="사진 크게 보기" onPress={() => setSelected(photo)} style={styles.cell}><PrivatePhoto photo={photo} /></Pressable>)}</View>
+    <View style={styles.grid}>{photos.map(photo => <View key={photo.id} style={styles.cell}><Pressable accessibilityRole="button" accessibilityLabel="사진 크게 보기" onPress={() => setSelected(photo)}><PrivatePhoto photo={photo} /></Pressable>{canUpload && <Button secondary label="사진 삭제" disabled={busy} onPress={() => setDeleteId(photo.id)} />}</View>)}</View>
+    {deleteId && <><Copy style={styles.hint}>선택한 사진을 이야기와 앨범에서 삭제할까요?</Copy><Button secondary label="확인 · 사진 삭제하기" disabled={busy} onPress={() => { setBusy(true); setError(''); void backend.api(`/photos/${deleteId}`, undefined, 'DELETE').then(() => { setPhotos(items => items.filter(item => item.id !== deleteId)); setSelected(null); setDeleteId(null); }).catch(e => setError(e instanceof Error ? e.message : '사진을 삭제하지 못했어요.')).finally(() => setBusy(false)); }} /><Button secondary label="취소" disabled={busy} onPress={() => setDeleteId(null)} /></>}
     {canUpload && <Button secondary label={busy ? '사진을 등록하고 있어요…' : '관련 사진 등록하기'} disabled={busy || photos.length >= 12} onPress={() => { void upload(); }} />}
     {!!error && <Copy accessibilityRole="alert" style={styles.error}>{error}</Copy>}
     <PhotoViewer photo={selected} onClose={() => setSelected(null)} />

@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View, type TextProps, type StyleProp, type ViewStyle, type ColorValue } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View, type TextProps, type TextInputProps, type StyleProp, type ViewStyle, type ColorValue } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { colors, fonts } from '../theme';
 import { useApp } from '../AppState';
@@ -22,6 +22,10 @@ export function Copy({ style, ...props }: TextProps) {
   const { textScale } = useApp();
   const flat = StyleSheet.flatten(style) || {};
   return <Text {...props} style={[styles.copy, style, { fontSize: (flat.fontSize || 18) * textScale, lineHeight: (flat.lineHeight || 29) * textScale }]} />;
+}
+export function Field({ label, ...props }: TextInputProps & { label: string }) {
+  const { textScale } = useApp();
+  return <View style={{ gap: 8 }}><Copy style={{ fontFamily: fonts.bold, fontSize: 16 }}>{label}</Copy><TextInput {...props} accessibilityLabel={label} style={[{ minHeight: 56, padding: 14, borderWidth: 1, borderColor: colors.line, borderRadius: 10, fontFamily: fonts.regular, fontSize: 17 * textScale, lineHeight: 27 * textScale, color: colors.ink, backgroundColor: colors.white }, props.style]} /></View>;
 }
 export function Header({ companion, companionLabel }: { companion?: string; companionLabel?: string }) {
   const connection = companionLabel ? `${companionLabel}${companionLabel === '부모님' ? '과' : '와'} 함께` : companion ? `${companion}님과 함께` : null;
