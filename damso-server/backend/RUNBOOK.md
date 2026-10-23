@@ -16,7 +16,7 @@ FastAPI + PostgreSQL 기반 앱 서버입니다. 공식 Full Stack FastAPI Templ
 | 알림 | 가족 연결·질문·기록·댓글·공감의 앱 내부 알림, 읽음 처리 |
 | STT·LLM | CLOVA Speech 전사, HCX-007 호출·워커, 키 입력·테스트 화면, DB 작업 큐·재시도, 원문·전사·요약 초안 분리 |
 
-**CLOVA Speech 장문 인식과 HCX-007 호출을 구현했습니다.** 제공자별 키가 없으면 해당 작업을 `waiting_provider`로 보관합니다. 등록한 Speech 키로 합성 음성 1건의 실제 STT→HCX 호출을 확인했습니다. 키 등록 후 테스트·대기 작업에서 실제 API 사용량이 발생합니다. TTS·음성 클로닝, 푸시·예약 알림 발송과 기존 Expo 화면의 API 연결은 별도 구현 대상입니다.
+**CLOVA Speech 장문 인식과 HCX-007 호출을 구현했습니다.** 제공자별 키가 없으면 해당 작업을 `waiting_provider`로 보관합니다. 등록한 Speech 키로 합성 음성 1건의 실제 STT→HCX 호출을 확인했습니다. 키 등록 후 테스트·대기 작업에서 실제 API 사용량이 발생합니다. TTS·음성 클로닝과 휴대폰 푸시·예약 알림 발송은 준비 중입니다. Expo 앱의 가입·가족 코드·프로필·질문·서재·댓글·공감·앱 내부 알림 화면은 API에 연결했습니다. 자세한 연결 범위는 `../../damso-mobile/README.md`에 정리했습니다.
 
 ## Windows 실행
 
