@@ -22,6 +22,18 @@
 
 *로컬 Expo 웹에서 실제 렌더링한 3D 서재. 액자에는 예시 이미지가 표시됩니다.*
 
+## Architecture
+
+```mermaid
+flowchart TD
+    Q["오늘의 질문"] --> I{"답변 방식"}
+    I -->|"음성"| S["CLOVA Speech로 전사"]
+    I -->|"글"| H["HyperCLOVA X로 요약 초안 생성"]
+    S --> H
+    H --> V["작성자가 초안을 검토·수정"]
+    V -->|"제출"| L["가족 서재에 공개"]
+```
+
 ## Tech Stack
 
 | 영역 | 기술 |
