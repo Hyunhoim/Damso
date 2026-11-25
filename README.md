@@ -1,118 +1,78 @@
-<div align="center">
-
 # 담소 · Damso
 
-**음성·생성형 AI 기반 비동기 가족 소통 서비스**
+**부모와 자녀가 하루 한 질문에서 시작해 서로의 이야기를 쌓는 비동기 가족 소통 앱**
 
-![React Native](https://img.shields.io/badge/React%20Native-315B89?style=flat-square) ![Expo](https://img.shields.io/badge/Expo-315B89?style=flat-square) ![TypeScript](https://img.shields.io/badge/TypeScript-315B89?style=flat-square) ![Three.js](https://img.shields.io/badge/Three.js-315B89?style=flat-square) ![FastAPI](https://img.shields.io/badge/FastAPI-315B89?style=flat-square) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-315B89?style=flat-square) ![CLOVA Speech](https://img.shields.io/badge/CLOVA%20Speech-315B89?style=flat-square) ![HyperCLOVA X](https://img.shields.io/badge/HyperCLOVA%20X-315B89?style=flat-square)
+## 프로젝트 소개
 
-[Overview](#overview) · [Features](#features) · [Architecture](#architecture) · [Tech Stack](#tech-stack) · [How to Run](#how-to-run)
+통화 시간을 맞추기 어려운 부모와 자녀가 각자 편한 시간에 질문에 답하고, 가족의 이야기를 개인 서재처럼 둘러볼 수 있도록 만들었습니다. 글이나 녹음으로 답하면 AI가 제목과 1인칭 이야기 초안을 제안합니다. 작성자가 내용을 확인해 공개하면 연결된 가족이 2D 서재에서 읽을 수 있습니다.
 
-</div>
+## 주요 기능
 
----
-
-## Overview
-
-부모와 자녀가 역할별 질문에 답하고 서로의 이야기를 각자의 시간에 읽는 가족 소통 서비스입니다. 글 또는 음성으로 작성한 답변을 STT와 LLM으로 정리하고 작성자가 확인한 이야기를 디지털 서재에 보관합니다. 가족 관계와 기록의 접근 권한, 원문 및 원음의 공개 여부를 분리하여 관리합니다.
-
-## Features
-
-| 기능 | 설명 |
+| 사용자 흐름 | 구현 |
 | --- | --- |
-| 가족 연결 | 부모 1명·자녀 1명 초대 코드 연결, 역할 및 호칭 관리 |
-| 일일 질문 | 기본·개별·AI 꼬리질문 및 가족 예약 질문, 사용자별 하루 최대 3개 |
-| 음성 및 글 | 녹음·업로드, CLOVA Speech 전사, HCX-007 제목 및 1인칭 요약 |
-| AI 작업 관리 | 처리 상태, 재시도, 재답변, 건너뛰기 및 작성자 확인 후 공개 |
-| 기억의 서재 | 날짜·작성자 필터, 이야기 상세, 원문·원음 재생 |
-| 사진 및 3D | 이야기 사진 등록·확대, 가족 앨범, 3D 책·액자 탐색 |
-| 개인정보 제어 | 가족별 접근 권한, 원문·원음 독립 공유 및 해제 |
-| 소통 API | 댓글·공감·앱 내부 알림 |
+| 질문 받기 | 가족 초대 코드로 부모와 자녀를 연결합니다. 기본·개별·AI 꼬리질문·가족 예약을 합해 사용자별 하루 최대 3개를 서버에서 관리합니다. |
+| 이야기 남기기 | 글 입력 또는 녹음으로 답하고, 전사·요약 상태 확인부터 재답변·건너뛰기·최종 공개까지 진행합니다. |
+| 가족 기록 보기 | 날짜·작성자별 이야기 탐색, 사진 첨부·가족 앨범, 공유된 원문 확인·원음 재생을 제공합니다. |
+| 3D 서재 둘러보기 | 웹과 모바일에서 같은 Three.js 장면을 열고, 책과 액자를 선택해 이야기 목록과 가족 앨범으로 이동합니다. |
 
-답변은 작성자가 제출하면 즉시 공개되며 상대의 답변을 기다리지 않습니다. 미공개 AI 초안과 재답변 이력은 가족에게 제공하지 않습니다. 3D 액자 표면은 예시 이미지이며 실제 가족 사진으로 자동 교체하지 않습니다. TTS·음성 클로닝과 OS 푸시, 일부 가입·연결 UI 통합은 현재 지원 범위와 구분됩니다.
+## 아키텍처
 
-## Architecture
+```mermaid
+flowchart LR
+    A["Expo 앱"] --> B["FastAPI"]
+    B --> D["PostgreSQL · 답변과 처리 작업"]
+    B --> F["비공개 음성·사진"]
+    D --> W["AI 워커"]
+    W --> S["CLOVA Speech · 음성 전사"]
+    W --> H["HyperCLOVA X · 1인칭 초안"]
+    W --> D
+    A --> R["Three.js 서재 · iframe / WebView"]
+```
 
-~~~mermaid
-flowchart TD
-  APP["Expo / React Native"] --> API["FastAPI REST API"]
-  APP --> WEB["Three.js 서재 / iframe 또는 WebView"]
-  API --> DB["PostgreSQL"]
-  API --> FS["비공개 음성 및 사진 파일"]
-  API --> J["DB 작업 큐 / AI Worker"]
-  J --> STT["CLOVA Speech"]
-  STT --> LLM["HCX-007 요약"]
-  LLM --> DB
-  DB --> API
-  API --> APP
-~~~
-
-| Path | Responsibility |
+| 영역 | 기술과 코드 위치 |
 | --- | --- |
-| `damso-mobile/` | 모바일 앱 및 웹 미리보기 |
-| `damso-library/` | React Three Fiber 기반 3D 서재 |
-| `damso-server/backend/` | 계정·가족·질문·답변 API, AI 워커, 마이그레이션 |
-| `scripts/` | 로컬 미리보기 실행 |
+| 앱 | Expo, React Native, Expo Router, TypeScript · [damso-mobile](damso-mobile/) |
+| 3D 서재 | Three.js, React Three Fiber, Vite · [damso-library](damso-library/) |
+| 서버 | FastAPI, SQLAlchemy, Alembic, PostgreSQL · [damso-server/backend](damso-server/backend/) |
 
-## Tech Stack
+## 핵심 구현
 
-| Layer | Technology |
-| --- | --- |
-| Mobile | React Native, Expo, Expo Router, TypeScript |
-| 3D | Three.js, React Three Fiber, Vite, GLB |
-| Backend | Python, FastAPI, SQLAlchemy, Alembic |
-| Data | PostgreSQL, 비공개 파일 저장 |
-| AI | CLOVA Speech, HyperCLOVA X HCX-007 |
-| Security | JWT, Argon2, 가족별 권한 검사 |
+1. **수정 전 AI 결과가 새 답변을 덮어쓰지 않도록 처리합니다.** 워커는 PostgreSQL에서 작업을 확보하고 외부 API를 트랜잭션 밖에서 호출합니다. 저장 직전에 답변 리비전과 처리 시도를 다시 확인합니다. 음성은 전사와 요약을 별도 작업으로 처리합니다. [작업 처리 코드](damso-server/backend/app/processing.py)
+2. **공개 시점과 공유 범위를 작성자가 결정합니다.** AI 초안은 작성자만 확인할 수 있습니다. 제출 직후 가족이 공개 본문을 읽을 수 있고, 원문과 원음은 별도로 공유하거나 해제할 수 있습니다. [답변 API](damso-server/backend/app/api/routes/answers.py) · [서재 API](damso-server/backend/app/api/routes/library.py)
+3. **3D 장면을 웹과 앱에서 재사용합니다.** Expo 웹의 iframe과 모바일 WebView가 같은 장면을 로드합니다. 준비·오류·이동 이벤트를 전달하고, 책과 액자 이벤트는 정해진 앱 화면으로만 연결됩니다. [3D 화면](damso-mobile/src/app/library-3d.tsx) · [3D 이벤트](damso-library/src/EmbedBoundary.tsx)
 
-## How to Run
+## 실행 및 검증
 
-### 1. Prerequisites
+**화면 미리보기**는 계정이나 AI 키 없이 열 수 있습니다. Windows에서 Git과 Node.js/npm을 준비합니다.
 
-Windows 로컬 실행 기준 Python 3.14, uv, Node.js/npm과 Git을 준비합니다.
-
-~~~powershell
+```powershell
 git clone https://github.com/Hyunhoim/Damso.git
 cd Damso
-~~~
+npm ci --prefix damso-library
+npm ci --prefix damso-mobile
+powershell -ExecutionPolicy Bypass -File scripts/start-damso-preview.ps1
+```
 
-### 2. Backend
+[Expo 웹](http://localhost:8081)에서 질문 화면과 서재를 둘러볼 수 있습니다. [3D 서재](http://localhost:5174)도 함께 실행됩니다.
 
-~~~powershell
+**실제 가족 기록과 AI 처리**를 확인하려면 새 터미널에서 저장소 루트 기준으로 실행합니다. Python 3.14와 uv가 필요합니다.
+
+```powershell
 cd damso-server/backend
 uv sync --python 3.14
 .venv/Scripts/python.exe -X utf8 scripts/run-local.py
-~~~
+```
 
-로컬 실행 도우미가 PostgreSQL, 마이그레이션, API 및 AI 워커를 준비합니다. API는 http://127.0.0.1:8000/docs 에서 확인하고, STT·LLM 키는 http://127.0.0.1:8000/dev/llm 에서 등록합니다. PostgreSQL 기본 포트는 5433입니다.
+실행 도우미가 로컬 PostgreSQL, 마이그레이션, API와 워커를 시작합니다. [로컬 키 설정](http://127.0.0.1:8000/dev/llm)에서 STT·LLM 키를 등록한 뒤 [API 계약](damso-server/backend/API_CONTRACT.md)에 따라 계정 생성과 가족 연결을 완료하고 앱 설정에서 로그인합니다.
 
-### 3. Mobile & 3D Preview
+```powershell
+npm test --prefix damso-mobile
+npm run typecheck --prefix damso-mobile
+npm run build --prefix damso-library
+```
 
-별도 터미널에서 저장소 루트를 기준으로 실행합니다.
+## 구현 범위
 
-~~~powershell
-cd damso-library
-npm ci
-cd ../damso-mobile
-npm ci
-cd ..
-powershell -ExecutionPolicy Bypass -File scripts/start-damso-preview.ps1
-~~~
+회원가입과 초대 코드 연결은 API에서 지원하며, 앱 설정은 연결을 마친 계정의 로그인을 지원합니다. 3D 액자 표면은 예시 이미지이고 실제 가족 사진은 연결된 앱의 앨범에서 엽니다. 댓글·공감·앱 내부 알림은 API에서 제공됩니다.
 
-- 앱 미리보기: http://localhost:8081
-- 3D 서재: http://localhost:5174
-- 실제 기기에서는 `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_LIBRARY_3D_URL`을 접근 가능한 주소로 설정합니다. AI 키 및 DB 비밀번호를 Expo 공개 변수에 넣지 않습니다.
-
-### 4. Development Checks
-
-~~~bash
-cd damso-mobile
-npm test
-npm run typecheck
-npm run lint
-npm run export:web
-cd ../damso-library
-npm run build
-~~~
-
-[모바일 가이드](damso-mobile/README.md) · [3D 서재](damso-library/README.md) · [백엔드 실행 가이드](damso-server/backend/RUNBOOK.md) · [API 계약](damso-server/backend/API_CONTRACT.md)
+[앱 개발 문서](damso-mobile/README.md) · [3D 서재 문서](damso-library/README.md) · [백엔드 실행 가이드](damso-server/backend/RUNBOOK.md) · [백엔드 템플릿 출처](damso-server/backend/UPSTREAM.md)
