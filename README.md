@@ -1,36 +1,49 @@
-# 담소 (Damso)
+<div align="center">
 
-부모와 자녀가 역할별 질문에 답하고 각자의 시간에 서로의 이야기를 읽는 가족 소통 앱입니다.
+# 담소 · Damso
 
-## 현재 구현 범위
+**AI 기반 비동기 가족 소통 서비스**
 
-| 구분 | 구현 내용 |
-| --- | --- |
-| 앱 | React Native·Expo 기반 온보딩, 부모/자녀 홈, 녹음·글 답변, 로그인 후 API 연결, 2D 서재·설정 |
-| 가족 | 부모 1명·자녀 1명 연결 API, 초대 코드·호칭·요약 문체 설정 |
-| 질문 | 역할별 기본 질문, 개별 질문, AI 꼬리질문, 가족이 요청한 다음 날 질문. 사용자별 하루 합계 최대 3개 |
-| STT·LLM | CLOVA Speech 전사 → HCX-007 제목·1인칭 요약. 처리 상태·재시도·재답변·건너뛰기, 작성자 확인 후 공개 |
-| 서재 | 날짜·작성자별 이야기, 원문 텍스트·원음 재생, 원문/원음의 독립적인 가족 공유 선택과 해제 |
-| 사진·3D | 이야기 관련 사진 등록·확대와 가족 앨범. 3D 책은 이야기 목록, 액자는 가족 앨범으로 연결 |
-| 글씨 | 기본 손글씨 1종·대체 2종, 질문 옆 작은 T 버튼으로 전환. 실제 폰트명은 UI에 표시하지 않음 |
-| 서버·저장 | FastAPI·PostgreSQL·Alembic, 인증·가족별 권한 검사, 비공개 음성·사진 파일, 댓글·공감·내부 알림 API |
+![React Native](https://img.shields.io/badge/React%20Native-315B89?style=flat-square) ![Expo](https://img.shields.io/badge/Expo-315B89?style=flat-square) ![TypeScript](https://img.shields.io/badge/TypeScript-315B89?style=flat-square) ![FastAPI](https://img.shields.io/badge/FastAPI-315B89?style=flat-square) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-315B89?style=flat-square) ![CLOVA Speech](https://img.shields.io/badge/CLOVA%20Speech-315B89?style=flat-square) ![HyperCLOVA X](https://img.shields.io/badge/HyperCLOVA%20X-315B89?style=flat-square) ![Three.js](https://img.shields.io/badge/Three.js-315B89?style=flat-square)
 
-답변은 작성자가 확인해 제출하면 즉시 공개합니다. 상대의 답변을 기다리는 잠금은 없습니다. 입력 원문·원음은 본인이 조회하고, 가족에게는 명시적으로 공유한 항목만 제공합니다. 과거 재답변 이력과 AI 초안은 가족에게 공개하지 않습니다.
+[Overview](#overview) · [Features](#features) · [Architecture](#architecture) · [Documentation](#documentation)
 
-질문 수는 기본·개별·AI·가족 예약을 모두 합해 하루 최대 3개입니다. AI는 하루 최대 1개, 가족 예약은 다음 날 최대 1개이며 매일 3개를 반드시 채우는 정책은 아닙니다.
+</div>
 
-## 실행 및 문서
+---
 
-- [모바일·3D 실행](damso-mobile/README.md): 각 프론트 폴더에서 `npm ci` 후 `scripts/start-damso-preview.ps1`. 앱 `http://localhost:8081`, 3D `http://localhost:5174`.
-- [백엔드·DB 실행](damso-server/backend/RUNBOOK.md): Python 3.14·uv 설치 후 `scripts/run-local.py`. API `http://127.0.0.1:8000`, PostgreSQL `127.0.0.1:5433`.
-- [API 명세](damso-server/backend/API_CONTRACT.md): 최신 질문 한도와 사진·원문·원음 공유 정책 포함.
-- [STT·LLM 검증 기록](damso-server/backend/STT_LLM_TEST_REPORT.md): 문서별 검증일·프롬프트 버전과 실제/합성 입력 범위 확인.
-- [최신 구현 현황 보고서](output/담소_프로젝트_구현현황_보고서_1021개정.docx).
+## Overview
 
-AI 키는 로컬 개발 설정 화면 `http://127.0.0.1:8000/dev/llm`에서 등록합니다. 실제 모델 테스트는 API 사용량이 발생합니다. 키·환경변수·DB·업로드 파일·빌드 결과는 Git에 포함하지 않습니다.
+부모와 자녀가 질문에 답하고 서로의 이야기를 각자의 시간에 읽는 가족 소통 앱입니다.
 
-## 검증과 남은 범위
+## Features
 
-2026-10-21 기준 서버 테스트 85개, 모바일 단위 테스트 9개, 타입·린트·웹 export와 3D build를 통과했습니다. Alembic 모델 일치와 웹에서 원음 재생·일시정지, 원문 공유, 사진·앨범, 손글씨 전환을 확인했습니다. 원음 재생 UI에는 테스트 음원을 사용했으며 실제 발화/STT 품질 평가와 구분합니다.
+- 역할별 질문과 AI 꼬리질문
+- 음성 전사 및 1인칭 요약, 작성자 확인 후 공개
+- 원문·원음 공유 제어와 가족별 접근 권한
+- 사진 앨범 및 인터랙티브 3D 서재
 
-가입·연결 코드 화면의 서버 통합, 일부 호칭 동기화·댓글·공감 UI와 OS 푸시 알림은 남아 있습니다. TTS·음성 클로닝은 준비 중입니다. Android/iOS 실제 녹음·청취·사진 선택, 3D 액자 터치, 기기 성능·사용자 평가와 외부 배포·백업 검증은 후속 작업입니다. 3D 액자 표면의 그림은 예시이며 실제 가족 사진으로 자동 교체하지 않습니다.
+## Architecture
+
+```mermaid
+flowchart LR
+ A[모바일 앱] --> B[FastAPI]
+ B --> C[STT]
+ C --> D[LLM 요약]
+ D --> E[작성자 확인]
+ E --> F[가족 서재]
+```
+
+## Tech Stack
+
+React Native · Expo · TypeScript · FastAPI · PostgreSQL · CLOVA Speech · HyperCLOVA X · Three.js
+
+## Project Status
+
+2026-10-21 기록 기준 서버 테스트 85개, 모바일 테스트 9개 통과. 실제 기기 검증, 외부 배포, TTS 및 OS 푸시는 후속 작업입니다.
+
+## Documentation
+
+[모바일](damso-mobile/README.md) · [3D 서재](damso-library/README.md) · [서버 실행](damso-server/backend/RUNBOOK.md) · [API 명세](damso-server/backend/API_CONTRACT.md)
+
+- [상세 개발·실행 안내 및 기존 README](README_DEVELOPMENT.md)
